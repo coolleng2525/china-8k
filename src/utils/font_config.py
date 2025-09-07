@@ -1,61 +1,91 @@
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import os
+
 
 def setup_fonts():
-    """
-    最简单的字体配置函数
-    使用matplotlib默认配置，避免复杂的字体检测逻辑
-    """
+    # 中文字体优先级列表（macOS适用）
+    font_priority = [
+        'PingFang SC',    # macOS系统字体
+        'Arial Unicode MS',  # Office附带字体
+        'Songti SC',      # macOS简体中文
+        'Heiti SC',       # 黑体简体
+        'STHeiti',        # 华文黑体
+        'Hiragino Sans GB' # 冬青黑体
+    ]
+    
+    # 自动选择第一个可用的中文字体
+    for font in font_priority:
+        if any(f.name == font for f in fm.fontManager.ttflist):
+            plt.rcParams['font.sans-serif'] = [font, 'Arial']
+            plt.rcParams['axes.unicode_minus'] = False
+            return
+    
+    # 回退方案
+    plt.rcParams['font.sans-serif'] = ['Arial']
+    print("警告：未找到中文字体，中文可能显示异常")
+
+
+# 额外的工具函数：测试特定字体是否可用
+def is_font_available(font_name):
+    """检查指定字体是否可用"""
     try:
-        print("使用matplotlib默认字体配置...")
-        
-        # 1. 使用matplotlib的默认配置
-        # 这会使用系统默认的字体处理机制
-        plt.rcParams['font.family'] = ['sans-serif']
-        plt.rcParams['axes.unicode_minus'] = False
-        
-        # 2. 尝试添加一些常见的中文字体（如果系统中有的话）
-        # 但不强制要求，让matplotlib使用系统默认字体
-        default_fonts = plt.rcParams['font.sans-serif']
-        chinese_fonts = ['Arial Unicode MS', 'Heiti TC', 'PingFang SC', 'SimHei']
-        
-        # 合并字体列表，保持默认字体优先
-        combined_fonts = default_fonts + [f for f in chinese_fonts if f not in default_fonts]
-        plt.rcParams['font.sans-serif'] = combined_fonts
-        
-        print(f"当前字体配置: {plt.rcParams['font.sans-serif'][:3]}...")
-        print("字体配置完成（使用系统默认字体）")
-        return True
-        
-    except Exception as e:
-        print(f"字体配置出错: {e}")
-        # 出错时使用最基本的配置
-        try:
-            plt.rcdefaults()
-            print("已使用matplotlib默认配置")
-        except:
-            pass
+        available_fonts = [f.lower() for f in fm.findSystemFonts(fontpaths=None, fontext='ttf')]
+        return font_name.lower() in available_fonts
+    except:
         return False
+
+
+# 额外的工具函数：获取系统中可用的中文字体列表
+def get_available_chinese_fonts():
+    """获取系统中可用的中文字体列表"""
+    try:
+        # 中文字体通常包含这些关键词
+        chinese_keywords = ['sim', 'hei', 'song', 'kai', 'microsoft', 'yahei', 
+                           'heiti', 'pingfang', 'wenquanyi', 'noto', 'cjk']
+        
+        available_fonts = []
+        for font_path in fm.findSystemFonts(fontpaths=None, fontext='ttf'):
+            try:
+                font_name = fm.FontProperties(fname=font_path).get_name()
+                if any(keyword in font_name.lower() for keyword in chinese_keywords):
+                    available_fonts.append(font_name)
+            except:
+                continue
+        
+        return list(set(available_fonts))  # 去重
+    except:
+        return []
+
 
 # 如果直接运行此脚本，则执行字体配置测试
 if __name__ == "__main__":
-    import os
     setup_fonts()
+    
+    # 显示系统可用的中文字体
+    chinese_fonts = get_available_chinese_fonts()
+    print(f"系统中可用的中文字体数量: {len(chinese_fonts)}")
+    if chinese_fonts:
+        print(f"前5个可用中文字体: {', '.join(chinese_fonts[:5])}")
     
     # 创建一个简单的测试图表
     try:
-        plt.figure(figsize=(6, 4))
-        plt.title('字体测试 Chart Title')
-        plt.xlabel('X轴 Label')
-        plt.ylabel('Y轴 Label')
-        plt.text(0.5, 0.5, '中文测试文本', ha='center', fontsize=16, transform=plt.gca().transAxes)
-        plt.text(0.5, 0.3, 'English Test Text', ha='center', fontsize=16, transform=plt.gca().transAxes)
+        plt.figure(figsize=(8, 6), dpi=100)
+        plt.title('中文字体测试 Chart Title')
+        plt.xlabel('X轴 标签')
+        plt.ylabel('Y轴 标签')
+        plt.text(0.5, 0.7, '中文测试文本', ha='center', fontsize=16, transform=plt.gca().transAxes)
+        plt.text(0.5, 0.5, 'English Test Text', ha='center', fontsize=16, transform=plt.gca().transAxes)
+        plt.text(0.5, 0.3, '中文显示测试 12345', ha='center', fontsize=14, transform=plt.gca().transAxes)
         plt.grid(True)
         
         # 保存测试图像
         os.makedirs('font_test_output', exist_ok=True)
-        plt.savefig('font_test_output/complete_font_test.png', dpi=100, bbox_inches='tight')
+        plt.savefig('font_test_output/complete_font_test.png', dpi=150, bbox_inches='tight')
         plt.close()
         
         print("字体测试图像已保存至: font_test_output/complete_font_test.png")
     except Exception as e:
         print(f"创建测试图像时出错: {e}")
+
+
