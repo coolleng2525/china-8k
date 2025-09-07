@@ -1,0 +1,79 @@
+# 虚拟环境目录
+venv/
+.env
+
+# Python编译文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 构建输出目录
+build/
+dist/
+*.spec
+
+# 输出文件目录
+outputs/
+font_test_output/
+tests/outputs/
+
+# 数据文件（如果不需要版本控制大文件）
+# data/
+
+# 日志文件
+*.log
+
+# 操作系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE配置文件
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 环境变量文件
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 包管理文件
+# requirements.txt 可以保留，因为它定义了项目依赖
+# 如果使用pipenv或poetry，可以添加：
+# Pipfile
+# Pipfile.lock
+# poetry.lock
+
+# 测试覆盖率
+.coverage
+.coverage.*
+coverage.xml
+
+# 旧代码目录
+old/
+
+# macOS相关
+.AppleDouble
+.LSOverride
+
+# Windows相关
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux相关
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*

@@ -1,0 +1,27 @@
+{
+  "global": {
+    "output_dir": "outputs",
+    "show_map": true,
+    "data_dir": "data"
+  },
+  "china": {
+    "filename": "china_map",
+    "data_path": null
+  },
+  "range": {
+    "radius": 8000,
+    "filename": "china_8000km_range"
+  },
+  "download": {
+    "china_data_path": "data/china.json"
+  },
+  "world": {
+    "filename": "world_map",
+    "data_path": null,
+    "json_urls": {
+      "primary": "https://raw.githubusercontent.com/datasets/geo-countries/master/data/countries.geojson",
+      "alternative": "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json"
+    },
+    "local_path": "data/world.json"
+  }
+}
