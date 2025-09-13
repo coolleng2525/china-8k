@@ -3,7 +3,9 @@
 
 import json
 import os
+import logging
 
+logger = logging.getLogger(__name__)
 
 class ConfigLoader:
     """
@@ -32,14 +34,14 @@ class ConfigLoader:
         """
         # 如果配置文件不存在，返回默认配置
         if not os.path.exists(self.config_path):
-            print(f"配置文件不存在: {self.config_path}，使用默认配置")
+            logger.warning(f"配置文件不存在: {self.config_path}，使用默认配置")
             return self._get_default_config()
         
         try:
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
-            print(f"加载配置文件失败: {e}，使用默认配置")
+            logger.error(f"加载配置文件失败: {e}，使用默认配置")
             return self._get_default_config()
     
     def _get_default_config(self):
@@ -53,7 +55,8 @@ class ConfigLoader:
             "global": {
                 "output_dir": "outputs",
                 "show_map": True,
-                "data_dir": "data"
+                "data_dir": "data",
+                "log_level": "info"
             },
             "china": {
                 "filename": "china_map",

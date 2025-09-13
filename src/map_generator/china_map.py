@@ -4,6 +4,7 @@ from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 from src.data_handler.json_loader import load_china_map_data
 from src.utils.font_config import setup_fonts
+import logging
 
 # 设置中文字体
 font_set = setup_fonts()
@@ -31,6 +32,9 @@ MAJOR_CITIES = [
     {"name": "兰州", "lat": 36.0, "lon": 103.8},
     {"name": "西宁", "lat": 36.6, "lon": 101.8}
 ]
+
+# 初始化日志
+logger = logging.getLogger(__name__)
 
 def draw_china_map(output_dir="outputs", filename_prefix="china_map", show_map=True, data_path=None):
     """
@@ -92,10 +96,12 @@ def draw_china_map(output_dir="outputs", filename_prefix="china_map", show_map=T
     p.set_color(colors[0 % len(colors)])  # 使用统一的颜色
     ax.add_collection(p)
     
+    print(f"正在绘制主要城市... number of cities: {len(MAJOR_CITIES)}")
     # 绘制主要城市
     for city in MAJOR_CITIES:
         ax.plot(city['lon'], city['lat'], 'ro', markersize=6)
         if font_set and len(MAJOR_CITIES) <= 20:  # 城市数量不多时才添加标签，避免拥挤
+            print(f"正在绘制城市: {city['name']}")
             ax.text(city['lon'] + 0.5, city['lat'] + 0.3, city['name'], fontsize=9)
     
     # 设置标题和标签
@@ -128,3 +134,19 @@ def draw_china_map(output_dir="outputs", filename_prefix="china_map", show_map=T
         plt.close()
     
     return [svg_path, png_path]
+
+
+def generate_china_map():
+    try:
+        logger.info("开始生成中国地图")
+        
+        # 替换原来的print语句
+        logger.debug(f"加载的省份数量: {len(provinces)}")
+        
+        # 错误处理示例
+        if not provinces:
+            logger.warning("未加载到任何省份数据")
+            
+    except Exception as e:
+        logger.error("生成中国地图时发生错误", exc_info=True)
+        raise

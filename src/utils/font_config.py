@@ -1,7 +1,14 @@
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import os
+import logging
 
+# 初始化日志配置
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 def setup_fonts():
     # 中文字体优先级列表（macOS适用）
@@ -19,11 +26,12 @@ def setup_fonts():
         if any(f.name == font for f in fm.fontManager.ttflist):
             plt.rcParams['font.sans-serif'] = [font, 'Arial']
             plt.rcParams['axes.unicode_minus'] = False
-            return
+            logger.info(f"已自动选择中英文字体：{font}")
+            return True
     
     # 回退方案
     plt.rcParams['font.sans-serif'] = ['Arial']
-    print("警告：未找到中文字体，中文可能显示异常")
+    logger.warning("未找到中文字体，中文可能显示异常")
 
 
 # 额外的工具函数：测试特定字体是否可用
@@ -32,7 +40,8 @@ def is_font_available(font_name):
     try:
         available_fonts = [f.lower() for f in fm.findSystemFonts(fontpaths=None, fontext='ttf')]
         return font_name.lower() in available_fonts
-    except:
+    except Exception as e:
+        logger.error(f"检查字体可用性时出错: {e}")
         return False
 
 
@@ -50,11 +59,13 @@ def get_available_chinese_fonts():
                 font_name = fm.FontProperties(fname=font_path).get_name()
                 if any(keyword in font_name.lower() for keyword in chinese_keywords):
                     available_fonts.append(font_name)
-            except:
+            except Exception as e:
+                logger.debug(f"处理字体路径 {font_path} 时出错: {e}")
                 continue
         
         return list(set(available_fonts))  # 去重
-    except:
+    except Exception as e:
+        logger.error(f"获取中文字体列表时出错: {e}")
         return []
 
 
@@ -64,9 +75,9 @@ if __name__ == "__main__":
     
     # 显示系统可用的中文字体
     chinese_fonts = get_available_chinese_fonts()
-    print(f"系统中可用的中文字体数量: {len(chinese_fonts)}")
+    logger.info(f"系统中可用的中文字体数量: {len(chinese_fonts)}")
     if chinese_fonts:
-        print(f"前5个可用中文字体: {', '.join(chinese_fonts[:5])}")
+        logger.info(f"前5个可用中文字体: {', '.join(chinese_fonts[:5])}")
     
     # 创建一个简单的测试图表
     try:
@@ -84,8 +95,8 @@ if __name__ == "__main__":
         plt.savefig('font_test_output/complete_font_test.png', dpi=150, bbox_inches='tight')
         plt.close()
         
-        print("字体测试图像已保存至: font_test_output/complete_font_test.png")
+        logger.info("字体测试图像已保存至: font_test_output/complete_font_test.png")
     except Exception as e:
-        print(f"创建测试图像时出错: {e}")
+        logger.error(f"创建测试图像时出错: {e}")
 
 

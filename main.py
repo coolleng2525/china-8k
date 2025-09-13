@@ -6,7 +6,16 @@ import os
 from src.map_generator import draw_china_map, draw_8000km_range_map, draw_world_map, draw_world_map_with_range
 from src.data_handler.json_loader import download_china_map_data
 from src.utils.config_loader import ConfigLoader  # 导入类而不是实例
+import logging
 
+# 获取日志级别映射关系
+LOG_LEVELS = {
+    'debug': logging.DEBUG,
+    'info': logging.INFO,
+    'warning': logging.WARNING,
+    'error': logging.ERROR,
+    'critical': logging.CRITICAL
+}
 
 def main():
     """
@@ -15,8 +24,10 @@ def main():
     # 创建命令行参数解析器
     parser = argparse.ArgumentParser(description='中国地图和8000公里范围地图生成器')
     
-    # 添加配置文件参数
+    # 添加全局参数
     parser.add_argument('--config', type=str, default=None, help='配置文件路径')
+    parser.add_argument('--log-level', type=str, default=None, choices=LOG_LEVELS.keys(),
+                        help='设置日志级别: debug, info, warning, error, critical')
     parser.add_argument('--generate-config', action='store_true', help='生成默认配置文件')
     
     # 添加子命令
@@ -62,10 +73,22 @@ def main():
     # 创建ConfigLoader实例
     config_loader = ConfigLoader(config_path=args.config)
     
+    # 确定日志级别并配置日志记录器
+    log_level_str = args.log_level or config_loader.get('global', {}).get('log_level', 'info')
+    log_level = LOG_LEVELS.get(log_level_str.lower(), logging.INFO)
+    
+    logging.basicConfig(
+        level=log_level,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    logger = logging.getLogger(__name__)
+    
+    logger.info("程序启动")
+    
     # 处理生成配置文件命令
     if args.generate_config:
         config_loader.generate_default_config()
-        print('默认配置文件已生成')
+        logger.info('默认配置文件已生成')
         return
     
     # 处理各个命令
@@ -79,9 +102,9 @@ def main():
             show_map=merged_args.get('show_map', True),
             data_path=merged_args.get('data_path')
         )
-        print(f"中国地图已生成并保存到以下文件：")
+        logger.info(f"中国地图已生成并保存到以下文件：")
         for file in files:
-            print(f"- {os.path.abspath(file)}")
+            logger.info(f"- {os.path.abspath(file)}")
     elif args.command == 'range':
         # 合并配置和命令行参数
         merged_args = config_loader.merge_with_args(args, 'range')
@@ -155,4 +178,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        # 确保即使在main函数外部发生异常也能正确记录日志
+        import logging
+        logging.basicConfig(
+            level=logging.ERROR,
+            format='%(asctime)s - %(levelname)s - %(message)s'
+        )
+        logging.exception("程序发生异常")
+        raise
